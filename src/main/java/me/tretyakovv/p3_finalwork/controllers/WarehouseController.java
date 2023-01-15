@@ -20,14 +20,14 @@ public class WarehouseController {
 
     @PostMapping
     @Operation(summary = "Поступления носков")
-    public ResponseEntity<Boolean> postSocks(@RequestBody Socks socks) {
-        return ResponseEntity.ok(warehouseService.postSocks(socks));
+    public ResponseEntity<Boolean> postSocks(@RequestBody Socks socks, @RequestParam int quantity) {
+        return ResponseEntity.ok(warehouseService.postSocks(socks, quantity));
     }
 
     @PutMapping
     @Operation(summary = "Отгрузка носков")
-    public ResponseEntity<Boolean> putSocks(@RequestBody Socks socks) {
-        if (warehouseService.releaseSocks(socks)) {
+    public ResponseEntity<Boolean> putSocks(@RequestBody Socks socks, @RequestParam int quantity) {
+        if (warehouseService.writeOffSocks(socks, quantity)) {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.notFound().build();
@@ -35,8 +35,8 @@ public class WarehouseController {
 
     @DeleteMapping
     @Operation(summary = "Утлизация носков")
-    public ResponseEntity<Boolean> utilizationSocks(@RequestBody Socks socks) {
-        if (warehouseService.releaseSocks(socks)) {
+    public ResponseEntity<Boolean> utilizationSocks(@RequestBody Socks socks, @RequestParam int quantity) {
+        if (warehouseService.writeOffSocks(socks, quantity)) {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.notFound().build();

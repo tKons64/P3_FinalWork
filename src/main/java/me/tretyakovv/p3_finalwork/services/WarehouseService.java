@@ -8,11 +8,12 @@ import java.util.HashMap;
 
 public interface WarehouseService {
 
-    boolean postSocks(Socks socks);
 
-    boolean releaseSocks(Socks socks);
+    boolean postSocks(Socks socks, int quantity);
 
-    HashMap<Integer, Socks> getListSocks();
+    boolean writeOffSocks(Socks socks, int quantity);
+
+    HashMap<Socks, Integer> getListSocks();
 
     int currenBalanceByParameters(Color color, Size size, int cottonMin, int cottonMax);
 }
