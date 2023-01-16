@@ -3,14 +3,19 @@ package me.tretyakovv.p3_finalwork.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import me.tretyakovv.p3_finalwork.model.*;
 import me.tretyakovv.p3_finalwork.services.FilesService;
+import me.tretyakovv.p3_finalwork.serializer.SocksKeyDeserializer;
+import me.tretyakovv.p3_finalwork.serializer.SocksKeySerializer;
 import me.tretyakovv.p3_finalwork.services.WarehouseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.HashMap;
 
 @Service
@@ -22,8 +27,12 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Value("${name.of.file.tableBalance}")
     private String dataFileTableBalance;
 
+    private ObjectMapper mapper;
+
     static HashMap<Long, Transactions> listTransactions = new HashMap<>();
 
+    @JsonSerialize(keyUsing = SocksKeySerializer.class)
+    @JsonDeserialize(keyUsing = SocksKeyDeserializer.class)
     static HashMap<Socks, Integer> tableBalance = new HashMap<>();
 
     private long lastId;
@@ -32,10 +41,16 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     public WarehouseServiceImpl(FilesService filesService) {
         this.filesService = filesService;
+        this.mapper = new ObjectMapper();
+
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addKeySerializer(Socks.class, new SocksKeySerializer());
+        simpleModule.addKeyDeserializer(Socks.class, new SocksKeyDeserializer());
+        this.mapper.registerModule(simpleModule);
     }
 
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
         readFromFile();
     }
     @Override
@@ -90,9 +105,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private void saveToFile() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            //mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
             String jsonTableBalance = mapper.writeValueAsString(tableBalance);
             String jsonTransactions = mapper.writeValueAsString(listTransactions);
             filesService.saveToFile(jsonTableBalance, dataFileTableBalance);
@@ -103,11 +115,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     }
 
-    private void readFromFile() {
+    private void readFromFile() throws IOException {
         String jsonTableBalance = filesService.readFromFile(dataFileTableBalance);
         String jsonTransactions = filesService.readFromFile(dataFileTransactions);
         try {
-            ObjectMapper mapper = new ObjectMapper();
             tableBalance = mapper.readValue(jsonTableBalance, new TypeReference<HashMap<Socks, Integer>>() {
             });
             listTransactions = mapper.readValue(jsonTransactions, new TypeReference<HashMap<Long, Transactions>>() {
