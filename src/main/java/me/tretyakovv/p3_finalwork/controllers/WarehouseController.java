@@ -3,7 +3,7 @@ package me.tretyakovv.p3_finalwork.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import me.tretyakovv.p3_finalwork.model.Color;
 import me.tretyakovv.p3_finalwork.model.Size;
-import me.tretyakovv.p3_finalwork.model.Socks;
+import me.tretyakovv.p3_finalwork.model.Sock;
 import me.tretyakovv.p3_finalwork.services.WarehouseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +20,14 @@ public class WarehouseController {
 
     @PostMapping
     @Operation(summary = "Поступления носков")
-    public ResponseEntity<Boolean> postSocks(@RequestBody Socks socks, @RequestParam int quantity) {
-        return ResponseEntity.ok(warehouseService.postSocks(socks, quantity));
+    public ResponseEntity<Boolean> postSocks(@RequestBody Sock sock, @RequestParam int quantity) {
+        return ResponseEntity.ok(warehouseService.postSocks(sock, quantity));
     }
 
     @PutMapping
     @Operation(summary = "Отгрузка носков")
-    public ResponseEntity<Boolean> putSocks(@RequestBody Socks socks, @RequestParam int quantity) {
-        if (warehouseService.writeOffSocks(socks, quantity)) {
+    public ResponseEntity<Boolean> putSocks(@RequestBody Sock sock, @RequestParam int quantity) {
+        if (warehouseService.writeOffSocks(sock, quantity)) {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.notFound().build();
@@ -35,8 +35,8 @@ public class WarehouseController {
 
     @DeleteMapping
     @Operation(summary = "Утлизация носков")
-    public ResponseEntity<Boolean> utilizationSocks(@RequestBody Socks socks, @RequestParam int quantity) {
-        if (warehouseService.writeOffSocks(socks, quantity)) {
+    public ResponseEntity<Boolean> utilizationSocks(@RequestBody Sock sock, @RequestParam int quantity) {
+        if (warehouseService.writeOffSocks(sock, quantity)) {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.notFound().build();

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,14 +15,14 @@ public class Transactions {
 
     private String dateTimeOperation;
 
-    private Socks socks;
+    private Sock sock;
 
     private int quantity;
 
-    public Transactions(TypeOpearation typeOpearation, Socks socks, int quantity) {
+    public Transactions(TypeOpearation typeOpearation, Sock sock, int quantity) {
         this.typeOpearation = typeOpearation;
         this.dateTimeOperation = LocalDateTime.now().toString();
-        this.socks = socks;
+        this.sock = sock;
         this.quantity = quantity;
     }
 }
