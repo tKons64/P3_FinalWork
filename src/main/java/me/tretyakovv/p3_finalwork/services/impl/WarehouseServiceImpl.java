@@ -29,7 +29,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     static HashMap<Long, Transactions> listTransactions = new HashMap<>();
 
-    static HashMap<Sock, Integer> tableBalance = new HashMap<>();
+    static HashMap<Socks, Integer> tableBalance = new HashMap<>();
 
     private long lastId;
 
@@ -40,8 +40,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         this.mapper = new ObjectMapper();
 
         SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addKeySerializer(Sock.class, new SocksKeySerializer());
-        simpleModule.addKeyDeserializer(Sock.class, new SocksKeyDeserializer());
+        simpleModule.addKeySerializer(Socks.class, new SocksKeySerializer());
+        simpleModule.addKeyDeserializer(Socks.class, new SocksKeyDeserializer());
         this.mapper.registerModule(simpleModule);
     }
 
@@ -50,29 +50,29 @@ public class WarehouseServiceImpl implements WarehouseService {
         readFromFile();
     }
     @Override
-    public boolean postSocks(Sock sock, int quantity) {
-        if (!sock.fillingСorrectly() && quantity > 0) {
+    public boolean postSocks(Socks socks, int quantity) {
+        if (!socks.fillingСorrectly() && quantity > 0) {
             return false;
         }
 
-        Transactions transaction = new Transactions(TypeOpearation.POST, sock, quantity);
+        Transactions transaction = new Transactions(TypeOpearation.POST, socks, quantity);
         listTransactions.put(lastId++, transaction);
-        tableBalance.put(sock, currenBalance(sock) + quantity);
+        tableBalance.put(socks, currenBalance(socks) + quantity);
         saveToFile();
         return true;
     }
 
     @Override
-    public boolean writeOffSocks(Sock sock, int quantity) {
-        if (!sock.fillingСorrectly() && quantity > 0) {
+    public boolean writeOffSocks(Socks socks, int quantity) {
+        if (!socks.fillingСorrectly() && quantity > 0) {
             return false;
         }
 
-        int balance = currenBalance(sock);
+        int balance = currenBalance(socks);
         if (balance >= quantity) {
-            Transactions transaction = new Transactions(TypeOpearation.RELEASE, sock, quantity);
+            Transactions transaction = new Transactions(TypeOpearation.RELEASE, socks, quantity);
             listTransactions.put(lastId++, transaction);
-            tableBalance.put(sock, currenBalance(sock) - quantity);
+            tableBalance.put(socks, currenBalance(socks) - quantity);
             saveToFile();
             return true;
         }
@@ -80,23 +80,31 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public HashMap<Sock, Integer> getListSocks() {
-        return tableBalance;
+    public String getListSocksInStock() {
+        String listSocks = "";
+        for (Socks socks : tableBalance.keySet()) {
+            int balance = tableBalance.get(socks);
+            if (balance <= 0) {
+                continue;
+            }
+            listSocks = listSocks + socks + " в наличии: " + balance + " шт." + "\n";
+        }
+        return listSocks;
     }
     @Override
     public int currenBalanceByParameters(Color color, Size size, int cottonMin, int cottonMax) {
         int balance = 0;
-        for (Sock sock : tableBalance.keySet()) {
-            if (sock.getColor() == color && sock.getSize() == size
-                && sock.getCottonPart() >= cottonMin && sock.getCottonPart() <= cottonMax) {
-                balance = balance + currenBalance(sock);
+        for (Socks socks: tableBalance.keySet()) {
+            if (socks.getColor() == color && socks.getSize() == size
+                && socks.getCottonPart() >= cottonMin && socks.getCottonPart() <= cottonMax) {
+                balance = balance + currenBalance(socks);
             }
         }
         return balance;
     }
 
-    private int currenBalance(Sock sock) {
-        return tableBalance.getOrDefault(sock, 0);
+    private int currenBalance(Socks socks) {
+        return tableBalance.getOrDefault(socks, 0);
     }
 
     private void saveToFile() {
@@ -115,8 +123,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         String jsonTableBalance = filesService.readFromFile(dataFileTableBalance);
         String jsonTransactions = filesService.readFromFile(dataFileTransactions);
         try {
-            //mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            tableBalance = mapper.readValue(jsonTableBalance, new TypeReference<HashMap<Sock, Integer>>() {});
+            tableBalance = mapper.readValue(jsonTableBalance, new TypeReference<HashMap<Socks, Integer>>() {
+            });
             listTransactions = mapper.readValue(jsonTransactions, new TypeReference<HashMap<Long, Transactions>>() {
             });
         } catch (JsonProcessingException e) {

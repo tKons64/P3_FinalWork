@@ -1,6 +1,9 @@
 package me.tretyakovv.p3_finalwork.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import me.tretyakovv.p3_finalwork.model.Color;
 import me.tretyakovv.p3_finalwork.model.Size;
 import me.tretyakovv.p3_finalwork.model.Sock;
@@ -45,10 +48,13 @@ public class WarehouseController {
     @GetMapping("")
     @Operation(summary = "Получить список всех носков на складе")
     public ResponseEntity<?> getAllSocksIn() {
-        return ResponseEntity.ok(warehouseService.getListSocks());
+        return ResponseEntity.ok(warehouseService.getListSocksInStock());
     }
     @GetMapping("/findSocksByParameters")
     @Operation(summary = "Получить текущий остаток носков, по параметрам")
+    @Parameters(value = {
+            @Parameter(name = "size", description = "размер", style = ParameterStyle.SPACEDELIMITED)
+    })
     public ResponseEntity<Integer> getcurrenBalanceByParameters(@RequestParam Color color,
                                                                 @RequestParam Size size,
                                                                 @RequestParam int cottonMin,

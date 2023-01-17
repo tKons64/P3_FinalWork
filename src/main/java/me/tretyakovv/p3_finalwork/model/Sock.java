@@ -18,4 +18,11 @@ public class Sock {
     public boolean fillingСorrectly() {
         return (color != null && size != null && cottonPart >= 0 && cottonPart <= 100);
     }
+
+    @Override
+    public String toString() {
+        return "Носки - " + color.getTitle() +
+                ", размер: " + size.getTitle() +
+                ", хлопок %: " + cottonPart;
+    }
 }
